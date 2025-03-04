@@ -1,0 +1,14 @@
+target_prometheus: "http://localhost:9090"
+mappings:
+  - direction: "query"
+    rules:
+      - source_label: "host"
+        target_label: "instance"
+      - source_label: "job"
+        target_label: "service"
+  - direction: "result"
+    rules:
+      - source_label: "instance"
+        target_label: "host"
+      - source_label: "job"
+        target_label: "service"
