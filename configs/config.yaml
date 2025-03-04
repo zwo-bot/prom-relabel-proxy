@@ -10,5 +10,5 @@ mappings:
     rules:
       - source_label: "instance"
         target_label: "host"
-      - source_label: "job"
-        target_label: "service"
+      - source_label: "service"
+        target_label: "job"
