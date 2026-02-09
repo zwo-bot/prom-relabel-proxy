@@ -1,5 +1,7 @@
 # Prometheus Label Rewriting Proxy (prom-relabel-proxy)
 
+[![CI](https://github.com/zwo-bot/prom-relabel-proxy/actions/workflows/ci.yml/badge.svg)](https://github.com/zwo-bot/prom-relabel-proxy/actions/workflows/ci.yml)
+
 A simple proxy service for Prometheus that rewrites labels in queries and results.
 
 ## Features
@@ -9,6 +11,8 @@ A simple proxy service for Prometheus that rewrites labels in queries and result
 - Handles compressed (gzip) responses from Prometheus
 - Configurable via YAML file
 - Transparent pass-through of authentication headers
+- Built-in Prometheus `/metrics` endpoint for proxy observability
+- Graceful shutdown with configurable timeout
 - Designed for easy extension with more complex rewriting rules
 
 ## Configuration
@@ -49,6 +53,13 @@ mappings:
 go build -o prom-relabel-proxy ./cmd/prom-relabel
 ```
 
+### Docker
+
+```bash
+docker build -t prom-relabel-proxy .
+docker run -p 8080:8080 -p 9090:9090 -v $(pwd)/configs:/configs prom-relabel-proxy
+```
+
 ### Running
 
 ```bash
@@ -59,7 +70,18 @@ go build -o prom-relabel-proxy ./cmd/prom-relabel
 
 - `--config`: Path to the configuration file (default: `configs/config.yaml`)
 - `--listen`: Address to listen on (default: `:8080`)
+- `--metrics-listen`: Address for the metrics endpoint (default: `:9090`)
 - `--debug`: Enable detailed debug logging (default: `false`)
+
+## Metrics
+
+The proxy exposes Prometheus metrics on a separate port (default `:9090`):
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `prom_relabel_proxy_requests_total` | Counter | Total requests processed (by method, path, status) |
+| `prom_relabel_proxy_request_duration_seconds` | Histogram | Request latency (by method, path) |
+| `prom_relabel_proxy_rewrite_errors_total` | Counter | Total rewrite errors (by direction) |
 
 ## Example
 
@@ -92,8 +114,6 @@ When run with the `--debug` flag, the proxy provides detailed logging about:
 - Label transformations in both directions
 - Content of requests and responses (truncated for readability)
 
-This can be helpful when troubleshooting label rewriting issues or understanding how the proxy is transforming your queries and results.
-
 ## Kubernetes Deployment
 
 For Kubernetes deployment, you can create a ConfigMap for the configuration and deploy the proxy as a Service.
@@ -101,6 +121,5 @@ For Kubernetes deployment, you can create a ConfigMap for the configuration and 
 ## Future Enhancements
 
 - Support for more complex transformation rules (regex, conditionals)
-- Metrics about proxy operations
 - Caching for performance optimization
 - Multiple upstream Prometheus servers
