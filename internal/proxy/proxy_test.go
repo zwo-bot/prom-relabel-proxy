@@ -69,7 +69,7 @@ func TestServeHTTP_QueryRewriting(t *testing.T) {
 		resp := map[string]string{
 			"received_query": r.URL.Query().Get("query"),
 		}
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	})
 	defer backend.Close()
 
@@ -106,7 +106,7 @@ func TestServeHTTP_POSTFormRewriting(t *testing.T) {
 		form, _ := url.ParseQuery(string(body))
 		receivedQuery = form.Get("query")
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"status":"success"}`))
+		_, _ = w.Write([]byte(`{"status":"success"}`))
 	})
 	defer backend.Close()
 
@@ -148,7 +148,7 @@ func TestServeHTTP_ResponseRewriting(t *testing.T) {
 
 	backend := newTestBackend(t, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(promResponse))
+		_, _ = w.Write([]byte(promResponse))
 	})
 	defer backend.Close()
 
@@ -184,9 +184,9 @@ func TestServeHTTP_GzipResponse(t *testing.T) {
 
 		var buf bytes.Buffer
 		gz := gzip.NewWriter(&buf)
-		gz.Write([]byte(promResponse))
+		_, _ = gz.Write([]byte(promResponse))
 		gz.Close()
-		w.Write(buf.Bytes())
+		_, _ = w.Write(buf.Bytes())
 	})
 	defer backend.Close()
 
@@ -224,7 +224,7 @@ func TestServeHTTP_GzipResponse(t *testing.T) {
 func TestServeHTTP_NonJSONPassthrough(t *testing.T) {
 	backend := newTestBackend(t, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("# HELP up Target is up\nup 1\n"))
+		_, _ = w.Write([]byte("# HELP up Target is up\nup 1\n"))
 	})
 	defer backend.Close()
 
